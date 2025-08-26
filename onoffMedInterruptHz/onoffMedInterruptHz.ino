@@ -3,7 +3,7 @@ const uint8_t ledPin1 = 10;
 const uint8_t ledPin2 = 11;
 int ledState1 = LOW;
 int ledState2 = LOW;
-int iterations = 1;
+int iterations = 0;
 
 void setup() {
   pinMode(ledPin1, OUTPUT);
@@ -19,7 +19,7 @@ void loop() {
 void blinkLed(){
   iterations += 1;
   if(iterations > 4){
-    iterations = 1;
+    iterations = 0;
     ledState2 = !ledState2;
   }
   ledState1 = !ledState1;
