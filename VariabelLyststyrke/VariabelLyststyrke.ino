@@ -1,12 +1,6 @@
 const int POTENTIOMETER = A5;
 
-const int LEDPins[] = {10,11,12,13};
-
-int maxIndex = 3;
-
-int LEDPin = LEDPins[0];
-
-int index = 0;
+int LEDPin = 10;
 
 void setup() {
   // put your setup code here, to run once:

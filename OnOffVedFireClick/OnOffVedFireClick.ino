@@ -1,8 +1,7 @@
 int counter = 0;
-int timesForChange = 4;
 const int ButtonIn = 4;
 bool lastRead = false;
-bool currentRead = true;
+bool currentRead = false;
 const int LEDPin = 10;
 bool LEDOn = false;
 

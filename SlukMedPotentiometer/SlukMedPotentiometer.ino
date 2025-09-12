@@ -10,6 +10,9 @@ int index = 0;
 
 void setup() {
   // put your setup code here, to run once:
+  for(int i = 0; i<=maxIndex; i++){
+    pinMode(LEDPins[i], OUTPUT);
+  }
   pinMode(LEDPin, OUTPUT);
   pinMode(POTENTIOMETER, INPUT);
   Serial.begin(9600);
