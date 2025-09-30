@@ -12,8 +12,10 @@ Sensor sensorInit(uint8_t pin) {
   int readings_sum = 0;
   for (int i = 0; i < 20; i++) {
     readings_sum += analogRead(pin);
-    delay(100);
+    delay(10);
   }
+  Serial.println(int(readings_sum / 20));
+
   return { pin, 100, int(readings_sum / 20), 0 };
 }
 
@@ -35,7 +37,7 @@ const float NO_SPEED = 0;
 
 bool read(Sensor* sensor) {
   int reading = analogRead(sensor->pin);
-  bool is_black = (reading - sensor->sensitivity) < sensor->black_value;
+  bool is_black = reading < (sensor->sensitivity + sensor->black_value);
   if(is_black){
     sensor->last_line_sighting = millis();
   }
@@ -102,6 +104,8 @@ void setup() {
   pinMode(PWM_RIGHT, OUTPUT);
   pinMode(PWM_LEFT, OUTPUT);
   pinMode(ON_BUTTON, INPUT);
+  Serial.begin(9600);
+
   SENSORS[0] = sensorInit(A1);
   SENSORS[1] = sensorInit(A2);
   SENSORS[2] = sensorInit(A3);
@@ -132,5 +136,5 @@ void loop() {
       turn(NO_SPEED,MEDIUM_SPEED);
     }
   }
-
+  delay(50);
 }
