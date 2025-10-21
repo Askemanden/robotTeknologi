@@ -16,7 +16,7 @@ Sensor sensorInit(uint8_t pin) {
   }
   Serial.println(int(readings_sum / 20));
 
-  return { pin, 100, int(readings_sum / 20), 0 };
+  return { pin, 10, int(readings_sum / 20), 0 };
 }
 
 const uint8_t DIR_LEFT = 10;
@@ -117,7 +117,11 @@ void setup() {
 
 void loop() {
   uint8_t reads = readAll();
+  Serial.print("Unmodified Readings ");
+  Serial.println(reads,BIN);
   reads = fixDiscontinuousReadings(reads);
+  Serial.print("Fixed Readings ");
+  Serial.println(reads,BIN);
   if(reads == 0b1111 || reads == 0b0110){
     turn(MAX_SPEED,MAX_SPEED);
   } else if(reads == 0b1000){
@@ -136,5 +140,5 @@ void loop() {
       turn(NO_SPEED,MEDIUM_SPEED);
     }
   }
-  delay(50);
+  delay(300);
 }
