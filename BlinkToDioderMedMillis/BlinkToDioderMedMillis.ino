@@ -1,4 +1,4 @@
-const int LEDPin1 = 10;
+const int LEDPin1 = 2;
 
 unsigned long lastTime1 = 0;
 
@@ -6,7 +6,7 @@ unsigned long currentTime = 0;
 
 bool LEDOn1 = false;
 
-const int LEDPin2 = 12;
+const int LEDPin2 = 3;
 
 unsigned long lastTime2 = 0;
 
@@ -21,7 +21,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   currentTime = millis();
-  if(currentTime - lastTime1 >= 250){
+  if(currentTime - lastTime1 >= 500){
     if(LEDOn1){
       digitalWrite(LEDPin1, LOW);
       LEDOn1 = false;
@@ -32,7 +32,7 @@ void loop() {
     lastTime1 = currentTime;
   }
 
-  if(currentTime - lastTime2 >= 1000){
+  if(currentTime - lastTime2 >= 1500){
     if(LEDOn2){
       digitalWrite(LEDPin2, LOW);
       LEDOn2 = false;
