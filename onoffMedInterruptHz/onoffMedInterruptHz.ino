@@ -8,12 +8,12 @@ int iterations = 0;
 void setup() {
   pinMode(ledPin1, OUTPUT);
   pinMode(ledPin2, OUTPUT);
-  Timer1.initialize(250000); //The led will blink in a half second time interval
+  Timer1.initialize(500000); //The led will blink in a half second time interval
   Timer1.attachInterrupt(blinkLed);
 }
 
 void loop() {
-  delay(5000);
+  delay(2000);
 }
 
 void blinkLed(){

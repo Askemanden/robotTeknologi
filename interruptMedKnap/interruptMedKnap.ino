@@ -1,4 +1,4 @@
-const uint8_t ledPin = 10;
+const uint8_t ledPin = 4;
 const uint8_t interruptPin = 2;  // input pin that the interruption will be attached to
 volatile uint8_t state = LOW;  // variable that will be updated in the ISR
 
@@ -9,7 +9,7 @@ void setup() {
 }
 
 void loop() {
-  delay(5000);
+  delay(2000);
 }
 
 void blink() {
