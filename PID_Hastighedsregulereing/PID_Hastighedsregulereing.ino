@@ -11,21 +11,21 @@ uint8_t LEDPin2 = 5;
 uint8_t HALL_SENSOR1 = 2;
 uint8_t HALL_SENSOR2 = 3;
 
-uint8_t MOTOR_SPEED_CONTROL = A0;
+uint8_t MOTOR_SPEED_CONTROL_PIN = A0;
 
 const int FULL_ROTATION = 960;
 
 // PID parameters
-float SystemSp = 7.0;
-float PKonst = 1.0;
-float PInt = 1.0;
-float PDiff = 1.0;
+float SystemSpænding = 9.0;
+float ProportionalConst = 1.0;
+float IntegralConst = 1.0;
+float DifferentialConst = 1.0;
 
 float Error = 0.0, ErrorBefore = 0.0, DiffError = 0.0, ErrorSum = 0.0;
-float MotorSp = 0.0, Hast = 0.0;
-float SetPktHast = 0.0;
+float PIDValue = 0.0, Hast = 0.0;
+float SetPunktHast = 0.0;
 
-int MotorPWM = 0;
+int MotorSpeed = 0;
 int MotorSetPoint = 0;
 
 bool Flag1 = LOW;
@@ -33,7 +33,7 @@ bool Flag2 = LOW;
 int iterationCounter = 0;
 
 // Encoder variables
-volatile boolean HALL_READ1, HALL_READ2;
+volatile bool HALL_READ1, HALL_READ2;
 volatile int StateNow = 0, StatePrior = 0;
 volatile long position = 0;
 volatile int StateArr[4][4] = {
@@ -44,7 +44,7 @@ volatile int StateArr[4][4] = {
 };
 
 long PositionBefore = 0;
-long PositionPrior = 0;
+long PositionAtLastRotation = 0;
 long PositionDiff = 0;
 
 unsigned long TimeNow = 0, TimeBefore = 0;
@@ -98,25 +98,25 @@ void loop() {
   TimeNow = micros();
 
   if ((TimeNow - TimeBefore) >= 100000) {
-    MotorSetPoint = analogRead(MOTOR_SPEED_CONTROL);
-    SetPktHast = float(MotorSetPoint) / 1024.0 * (SystemSp - 4.0);
+    MotorSetPoint = analogRead(MOTOR_SPEED_CONTROL_PIN);
+    SetPunktHast = float(MotorSetPoint) / 1024.0 * (SystemSpænding - 4.0);
 
     PositionDiff = position - PositionBefore;
     Hast = float(PositionDiff) / 1920.0 * 10.0;
     PositionBefore = position;
 
-    Error = SetPktHast - Hast;
+    Error = SetPunktHast - Hast;
     DiffError = Error - ErrorBefore;
     ErrorBefore = Error;
 
     ErrorSum += Error;
-    ErrorSum = constrain(ErrorSum, 0.0, SystemSp / PInt);
+    ErrorSum = constrain(ErrorSum, 0.0, SystemSpænding / IntegralConst);
 
-    MotorSp = PKonst * Error + PDiff * DiffError + PInt * ErrorSum;
-    MotorSp = constrain(MotorSp, 0.0, SystemSp);
+    PIDValue = ProportionalConst * Error + DifferentialConst * DiffError + IntegralConst * ErrorSum;
+    PIDValue = constrain(PIDValue, 0.0, SystemSpænding);
 
-    MotorPWM = int(MotorSp / SystemSp * 255.0);
-    analogWrite(MPWMPin, MotorPWM);
+    MotorSpeed = int(PIDValue / SystemSpænding * 255.0);
+    analogWrite(MPWMPin, MotorSpeed);
 
     TimeBefore = TimeNow;
 
@@ -128,8 +128,8 @@ void loop() {
     }
   }
 
-  if (abs(position - PositionPrior) >= FULL_ROTATION) {
-    PositionPrior = position;
+  if (abs(position - PositionAtLastRotation) >= FULL_ROTATION) {
+    PositionAtLastRotation = position;
     Flag2 = !Flag2;
     digitalWrite(LEDPin2, Flag2);
   }
