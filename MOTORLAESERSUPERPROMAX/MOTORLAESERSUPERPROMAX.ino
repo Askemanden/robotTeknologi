@@ -16,8 +16,8 @@ const int FULL_ROTATION = 960;
 
 int number_of_iterations_since_last_reset = 0;
 
-boolean Flag1 = LOW;
-boolean Flag2 = LOW;
+bool Flag1 = LOW;
+bool Flag2 = LOW;
 
 int MotorSetPoint;
 int MotorSignal;
@@ -25,7 +25,6 @@ int MotorSignal;
 volatile boolean HALL_READ1, HALL_READ2;
 volatile int StateNow, StatePrior;
 volatile long position = 0;
-volatile int ArrIndex;
 volatile int StateArr[4][4]={
   {0,-1,0,1},
   {1,0,-1,0},
@@ -33,7 +32,7 @@ volatile int StateArr[4][4]={
   {-1,0,1,0}
 };
 
-long StepPrior = 0;
+long PositionAtLastReset = 0;
 int StepSinceLastReset;
 
 bool direction = HIGH;
@@ -81,7 +80,7 @@ void IntProg() {
   if (HALL_READ1 == LOW && HALL_READ2 == LOW) StateNow = 2;
   if (HALL_READ1 == LOW && HALL_READ2 == HIGH) StateNow = 3;
 
-  position = position + StateArr[StateNow][StatePrior];
+  position += StateArr[StateNow][StatePrior];
   StatePrior = StateNow;
 }
 
@@ -98,9 +97,9 @@ void loop() {
     
   analogWrite(MPWMPin,MotorSignal);
 
-  StepSinceLastReset = position - StepPrior;
+  StepSinceLastReset = position - PositionAtLastReset;
   if (StepSinceLastReset >= FULL_ROTATION || StepSinceLastReset <= -FULL_ROTATION) {
-    StepPrior = position;
+    PositionAtLastReset = position;
     StepSinceLastReset = 0;
     Flag1 = !Flag1;
     digitalWrite(LEDPin1,Flag1);
