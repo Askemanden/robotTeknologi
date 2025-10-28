@@ -66,7 +66,7 @@ void setup() {
 
   // Initiel aflæsning
   int A_READ = digitalRead(ENCODER_OUT_A);
-  int B_READ = digitalRead(ENCODER_OUT_B);
+  int B_READ = digi talRead(ENCODER_OUT_B);
 
   if (A_READ == HIGH && B_READ == HIGH) current_value = 0;
   else if (A_READ == LOW && B_READ == HIGH) current_value = 1;
@@ -77,5 +77,5 @@ void setup() {
 }
 
 void loop() {
-  // Intet her – alt håndteres i interrupt
+  // Intet her – alt håndteres i interrupts
 }
