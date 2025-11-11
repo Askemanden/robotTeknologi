@@ -27,7 +27,7 @@ float ErrorSum = 0.0;
 float SetPktPos = 0.0;
 
 int MotorPWM = 0;
-int AnalogSet = 0;
+int position_control_reading = 0;
 
 bool Flag1 = LOW;
 bool Flag2 = LOW;
@@ -105,8 +105,8 @@ void loop() {
   TimeNow = micros();
 
   if ((TimeNow - TimeBefore) >= 100000UL) {
-    AnalogSet = analogRead(POSITION_CONTROL);
-    SetPktPos = float(AnalogSet) / 1024.0 * float(ANALOG_TO_STEPS) - float(ANALOG_TO_STEPS) / 2.0;
+    position_control_reading = analogRead(POSITION_CONTROL);
+    SetPktPos = float(position_control_reading) / 1024.0 * float(ANALOG_TO_STEPS) - float(ANALOG_TO_STEPS) / 2.0;
 
     Error = SetPktPos - float(position);
 
