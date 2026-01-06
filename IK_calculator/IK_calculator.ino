@@ -110,7 +110,9 @@ void GenerateLinePath(Vector start, Vector end, double stepDist) {
 
 void setup() {
   Serial.begin(9600);
-  GenerateLinePath({0,10}, {-10,-10}, 0.5);
+
+
+  GenerateLinePath({10,10}, {-10,-10}, 0.5);
 
   for(int i = 0; i < PATH_LENGTH; i++){
     if(path[i].x == ENDLIST.x && path[i].y == ENDLIST.y){
@@ -126,7 +128,42 @@ void setup() {
     AnglesRad ang = computeIK(10,10,path[i].x,path[i].y);
     Serial.print(ang.theta1); Serial.print(", "); Serial.print(ang.theta2); Serial.print("\n");
     delay(100);
+  }
 
+  GenerateLinePath({-10,-10}, {-10,10}, 0.5);
+
+  for(int i = 0; i < PATH_LENGTH; i++){
+    if(path[i].x == ENDLIST.x && path[i].y == ENDLIST.y){
+      break;
+    }
+    Serial.print(path[i].x); Serial.print(", "); Serial.print(path[i].y); Serial.print("\n");
+    delay(100);
+  }
+  for(int i = 0; i < PATH_LENGTH; i++){
+    if(path[i].x == ENDLIST.x && path[i].y == ENDLIST.y){
+      break;
+    }
+    AnglesRad ang = computeIK(10,10,path[i].x,path[i].y);
+    Serial.print(ang.theta1); Serial.print(", "); Serial.print(ang.theta2); Serial.print("\n");
+    delay(100);
+  }
+
+  GenerateLinePath({-10,10}, {10,10}, 0.5);
+
+  for(int i = 0; i < PATH_LENGTH; i++){
+    if(path[i].x == ENDLIST.x && path[i].y == ENDLIST.y){
+      break;
+    }
+    Serial.print(path[i].x); Serial.print(", "); Serial.print(path[i].y); Serial.print("\n");
+    delay(100);
+  }
+  for(int i = 0; i < PATH_LENGTH; i++){
+    if(path[i].x == ENDLIST.x && path[i].y == ENDLIST.y){
+      break;
+    }
+    AnglesRad ang = computeIK(10,10,path[i].x,path[i].y);
+    Serial.print(ang.theta1); Serial.print(", "); Serial.print(ang.theta2); Serial.print("\n");
+    delay(100);
   }
 }
 
