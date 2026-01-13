@@ -3,27 +3,22 @@
 #include <math.h>
 #include <Servo.h>
 
-#define PATH_LENGTH 200
-#define DOUBLE_MAX 1.7976931348623157e+308
-#define DOUBLE_MIN 2.2250738585072014e-308
+#define PATH_LENGTH 100
+#define DOUBLE_MAX 1.7976931348623157e+10
+#define DOUBLE_MIN 2.2250738585072014e-10
+//#define PI 3.1415926535897932385
 
 double lower_arm_length = 20, upper_arm_length = 18;
-const double PI = 3.1415926535897932385;
 
 typedef struct Vector{
   double x;
   double y;
 } Vector;
 
-typedef struct AnglesRad{
+typedef struct Angles{
   double theta1;
   double theta2;
-} AnglesRad;
-
-typedef struct AnglesDeg{
-  double theta1;
-  double theta2;
-} AnglesDeg;
+} AnglesRad, AnglesDeg;
 
 Vector VectorAdd(Vector a, Vector b){
   return (Vector){a.x+b.x, a.y+b.y};
@@ -63,11 +58,13 @@ const int motor_speed = 50,         // Hastigheden motoren kører i.
 
 
 int nice_position = 0,              // Den ønskede position for motoren i trin.
-    threshold = 10;                 // Hvor mange trin motoren er tilladt at dreje, før den korrigeres.
+    threshold = 20;                 // Hvor mange trin motoren er tilladt at dreje, før den korrigeres.
 // Rotation med uret giver positive trin.
 
 // Pins
 const uint8_t clockwise = 13, counterclockwise = 12, enable = 11, encoder1 = 2, encoder2 = 3;
+
+Servo my_servo;
 
 void turn(bool cw)
 {
@@ -77,9 +74,8 @@ void turn(bool cw)
 }
 
 // Vektorer
-Vector start = {5, 5};  // UN PRE Dicatble!!!
-Vector end = {10, 10};
-
+Vector start = {5, 5};
+Vector end = {15, 15};
 
 AnglesRad computeIK(double Px, double Py, double L1 = lower_arm_length, double L2 = upper_arm_length){
   double r = sqrt(Px * Px + Py * Py);
@@ -162,36 +158,50 @@ void setup() {
   digitalWrite(clockwise, LOW);
   digitalWrite(counterclockwise, LOW);
 
+  my_servo.attach(5);
+
   GenerateLinePath(start, end, 0.5);
 }
 
-int nicepos(int angle)
+double nicepos(double angle)
 {
-  return(angle * FULL_ROTATION/2*PI);
+  return(angle * FULL_ROTATION/(2*PI));
 }
 
-int set_motor_steps(int steps)
+int set_motor_steps()
 {
-  static uint index = 0;
+  static unsigned int index = 0;
 
-  if ((current_position - nice_position) > threshold || current_position - nice_position < - threshold)
+  if (abs(current_position - nice_position) < threshold)
   {
-    computeIK(path[index].x , path[index].y);
+    if (path[index].x == ENDLIST.x || path[index].y == ENDLIST.y)
+    {
+      return 0;
+    }
+    AnglesRad vinkler = computeIK(path[index].x , path[index].y);
+    index++;
+    nice_position = nicepos(vinkler.theta1);
+    servo_motor_turn(vinkler.theta2);
+
+    Serial.print(vinkler.theta1);
+    Serial.print(",");
+    Serial.println(vinkler.theta2);
   }
   return 0;
 }
 
-int motor_turn()
+int dc_motor_turn()
 {
   int error = current_position - nice_position;
+  //Serial.println(error);
   if (threshold <= 0)
   {
     Serial.println("Mongol!, Fejl i threshold værdi");
     return 1;
   }
-  if (error <= threshold || error >= -threshold)
+  if (error >= threshold || error <= -threshold)
   {
-    turn(!bool(( (error / abs(error)) + 1) * 0.5));
+    turn(bool(( (error / abs(error)) + 1) / 2));
   } else
   {
     analogWrite(enable, 0);
@@ -199,7 +209,14 @@ int motor_turn()
   return 0;
 }
 
+int servo_motor_turn(double angle)
+{
+  my_servo.write(int(angle*(180/PI)));
+  return 0;
+}
+
 void loop()
 {
-
+  set_motor_steps();
+  dc_motor_turn();
 }
