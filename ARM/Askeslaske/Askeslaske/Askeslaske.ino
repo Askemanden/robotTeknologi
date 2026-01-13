@@ -64,6 +64,8 @@ int nice_position = 0,              // Den ønskede position for motoren i trin.
 // Pins
 const uint8_t clockwise = 13, counterclockwise = 12, enable = 11, encoder1 = 2, encoder2 = 3;
 
+volatile bool finished = false;
+
 Servo my_servo;
 
 void turn(bool cw)
@@ -87,7 +89,7 @@ AnglesRad computeIK(double Px, double Py, double L1 = lower_arm_length, double L
   AnglesRad result = {theta1, theta2};
   return result;
 }
-
+int path_index = 0;
 void GenerateLinePath(Vector start, Vector end, double stepDist) {
     Vector diff = VectorAdd(end, VectorMul(start, -1));   // end - start
     double totalDist = VectorLength(diff);
@@ -104,31 +106,32 @@ void GenerateLinePath(Vector start, Vector end, double stepDist) {
 
     Vector direction = VectorNormalize(diff);
     
-    int index = 0;
+    int Jens_Aage = 0;
     double traveled = 0.0;
     while (traveled <= totalDist) {
         // ERROR if we run out of space
-        if (index >= PATH_LENGTH) {
+        if (Jens_Aage >= PATH_LENGTH) {
             Serial.println("ERROR: path[] overflow");
             return;
         }
-        path[index] = VectorAdd(start, VectorMul(direction, traveled));
+        path[Jens_Aage] = VectorAdd(start, VectorMul(direction, traveled));
         traveled += stepDist;
-        index++;
+        Jens_Aage++;
     }
     // Add final endpoint
-    if (index >= PATH_LENGTH) {
+    if (Jens_Aage >= PATH_LENGTH) {
         Serial.println("ERROR: path[] overflow");
         return;
     }
-    path[index] = end;
-    index++;
+    path[Jens_Aage] = end;
+    Jens_Aage++;
     // Add ENDLIST
-    if (index >= PATH_LENGTH) {
+    if (Jens_Aage >= PATH_LENGTH) {
         Serial.println("ERROR: path[] overflow");
         return;
     }
-    path[index] = ENDLIST;
+    path[Jens_Aage] = ENDLIST;
+    path_index = 0;
 }
 
 // Tæller antal trin som motoren har kørt, og hvad retning.
@@ -170,22 +173,21 @@ double nicepos(double angle)
 
 int set_motor_steps()
 {
-  static unsigned int index = 0;
-
   if (abs(current_position - nice_position) < threshold)
   {
-    if (path[index].x == ENDLIST.x || path[index].y == ENDLIST.y)
+    if (path[path_index].x == ENDLIST.x || path[path_index].y == ENDLIST.y)
     {
+      finished = true;
       return 0;
     }
-    AnglesRad vinkler = computeIK(path[index].x , path[index].y);
-    index++;
+    AnglesRad vinkler = computeIK(path[path_index].x , path[path_index].y);
+    path_index++;
     nice_position = nicepos(vinkler.theta1);
     servo_motor_turn(vinkler.theta2);
 
-    Serial.print(vinkler.theta1);
-    Serial.print(",");
-    Serial.println(vinkler.theta2);
+    //Serial.print(vinkler.theta1);
+    //Serial.print(",");
+    //Serial.println(vinkler.theta2);
   }
   return 0;
 }
@@ -209,9 +211,23 @@ int dc_motor_turn()
   return 0;
 }
 
-int servo_motor_turn(double angle)
+int servo_motor_turn(double rad_angle)
 {
-  my_servo.write(int(angle*(180/PI)));
+  my_servo.write(int(rad_angle*(180/PI)));
+  return 0;
+}
+
+int random_path_generator()
+{
+  if (finished != false)
+  {
+    Vector new_start = end, new_end = {};
+    new_end.x = random(5, 25); new_end.y = random(5, 25);
+    GenerateLinePath(new_start, new_end , 0.5);
+    start = new_start; end = new_end;
+    finished = false;
+    return 0;
+  }
   return 0;
 }
 
@@ -219,4 +235,5 @@ void loop()
 {
   set_motor_steps();
   dc_motor_turn();
+  random_path_generator();
 }
